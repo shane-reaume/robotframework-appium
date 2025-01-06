@@ -211,9 +211,27 @@
         tests/ios/test_app.robot
 
    # Start Android Emulator and run tests
-   # Replace 'Pixel_7_API_34' with your AVD name
-   emulator -avd Pixel_7_API_34
+   # Replace 'Pixel_7_API_35' with your AVD name
+   $ANDROID_HOME/emulator/emulator -avd Pixel_7_API_35 -gpu host
+
+   # Method 1: Using YAML config (not recommended)
    robot -A configs/android.yaml tests/android/test_app.robot
+
+   # Method 2: Using direct variable assignment (recommended)
+   robot --variable APPIUM_HOST:localhost \
+        --variable APPIUM_PORT:4723 \
+        --variable PLATFORM_NAME:Android \
+        --variable PLATFORM_VERSION:15.0 \
+        --variable DEVICE_NAME:Pixel_7_API_35 \
+        --variable AUTOMATION_NAME:UiAutomator2 \
+        --variable APP:${PWD}/apps/android/TestApp.apk \
+        --variable APP_PACKAGE:io.appium.android.apis \
+        --variable APP_ACTIVITY:io.appium.android.apis.ApiDemos \
+        --variable TIMEOUT:60 \
+        --variable RETRY_COUNT:2 \
+        --variable UIAUTOMATOR2_SERVER_LAUNCH_TIMEOUT:60000 \
+        --outputdir results \
+        tests/android/test_app.robot
    ```
 
 ## 📊 Test Capabilities
@@ -248,12 +266,22 @@ Results are generated in HTML format:
    # Verify iOS deployment tools
    ios-deploy --version
    idb list targets
-   
-   # Check Carthage installation
-   carthage version
    ```
 
-3. **Appium Server Issues**
+3. **Android Test Issues**
+   ```bash
+   # If tests fail with UiAutomator2 server launch timeout
+   # Increase the timeout value in the command:
+   --variable UIAUTOMATOR2_SERVER_LAUNCH_TIMEOUT:60000
+
+   # If emulator is slow, use GPU acceleration
+   $ANDROID_HOME/emulator/emulator -avd Pixel_7_API_35 -gpu host
+
+   # Verify Android device connection
+   adb devices
+   ```
+
+4. **Appium Server Issues**
    - Verify server is running: `curl http://localhost:4723/wd/hub/status`
    - Check appium-doctor results: `appium-doctor --ios` or `appium-doctor --android`
    - If port 4723 is already in use:
@@ -270,7 +298,7 @@ Results are generated in HTML format:
      appium --log appium.log
      ```
 
-4. **iOS Simulator Issues**
+5. **iOS Simulator Issues**
    - Reset simulator: Simulator → Device → Erase All Content and Settings
    - Verify Xcode command line tools: `xcode-select -p`
    - If Xcode path is incorrect after update:
@@ -283,7 +311,7 @@ Results are generated in HTML format:
      appium driver install xcuitest
      ```
 
-5. **Android Emulator Issues**
+6. **Android Emulator Issues**
    ```bash
    # Verify Java installation
    java -version  # Should show Java version
@@ -325,7 +353,7 @@ Results are generated in HTML format:
    - If ADB not found: `brew install android-platform-tools`
    - If emulator is slow: Enable hardware acceleration in Android Studio AVD Manager
 
-6. **Environment Variable Issues**
+7. **Environment Variable Issues**
    ```bash
    # Add these to your shell's rc file (~/.zshrc or ~/.bash_profile)
    export JAVA_HOME=$(/usr/libexec/java_home)
