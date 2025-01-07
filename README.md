@@ -4,7 +4,7 @@
 
 > Automated mobile testing for iOS and Android using Robot Framework with Appium
 
-## 🚀 Prerequisites Installation
+## 🚀 Prerequisites
 
 1. **Install Xcode (for iOS testing)**
    ```bash
@@ -13,15 +13,12 @@
    ```
    - Launch Xcode and accept license agreement
    - Install iOS Simulator from Xcode → Preferences → Components
+   - Install iPhone 16 Pro simulator with iOS 18.2
 
 2. **Install Android Studio (for Android testing)**
    ```bash
    # Install Java Development Kit (JDK)
    brew install --cask zulu  # Install latest Zulu JDK
-
-   # Set JAVA_HOME in ~/.zshrc or ~/.bash_profile
-   echo 'export JAVA_HOME=$(/usr/libexec/java_home)' >> ~/.zshrc
-   source ~/.zshrc
    ```
 
    Android Studio Setup:
@@ -29,9 +26,7 @@
    - Install Android Studio
    - During first launch, complete the Android Studio Setup Wizard
    - After setup, in Android Studio:
-     1. Click the "More Actions" button (⚙️) or go to "Settings/Preferences":
-        - On Mac: Android Studio → Settings (or press ⌘,)
-        - On Windows/Linux: File → Settings
+     1. Click the "More Actions" button (⚙️) or go to "Settings/Preferences"
      2. Navigate to Languages & Frameworks → Android SDK
      3. In the SDK Tools tab:
         - Check "Android SDK Command-line Tools (latest)"
@@ -41,110 +36,27 @@
      5. Note down the Android SDK Location shown at the top (this is your ANDROID_HOME)
 
 3. **Set up Environment Variables**
+   Add these to your shell configuration file (`~/.zshrc` or `~/.bash_profile`):
    ```bash
-   # Add these to your ~/.zshrc or ~/.bash_profile
+   # Java Home
+   export JAVA_HOME=$(/usr/libexec/java_home)
+
+   # Android SDK
    export ANDROID_HOME=$HOME/Library/Android/sdk
    export PATH=$PATH:$ANDROID_HOME/tools
    export PATH=$PATH:$ANDROID_HOME/tools/bin
    export PATH=$PATH:$ANDROID_HOME/platform-tools
    export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
    export PATH=$PATH:$ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)
-
-   # Reload shell configuration
+   ```
+   Then reload your shell:
+   ```bash
    source ~/.zshrc  # or source ~/.bash_profile
    ```
 
-4. **Install Additional Android Tools**
+4. **Install Node.js**
    ```bash
-   # Install bundletool for Android App Bundle support
-   brew install bundletool
-
-   # Install gstreamer for screen streaming (optional)
-   brew install gstreamer gst-plugins-base gst-plugins-good
-   ```
-
-4. **Install Node.js and Appium**
-   ```bash
-   # Install Node.js using brew
-   brew install node
-
-   # Install Appium and core dependencies
-   npm install -g @appium/doctor --location=global
-   npm install -g appium
-
-   # Install required iOS dependencies
-   brew install carthage
-   npm install -g ios-deploy
-
-   # Verify core installation
-   appium-doctor --ios  # For iOS setup verification
-   appium-doctor --android  # For Android setup verification
-   ```
-
-   Optional iOS dependencies (install as needed):
-   ```bash
-   # For MJPEG-over-HTTP features
-   npm install -g mjpeg-consumer
-
-   # For simulator location testing
-   brew install lyft/formulae/set-simulator-location
-
-   # For enhanced iOS simulator control
-   brew tap wix/brew
-   brew install applesimutils
-
-   # For advanced iOS device management
-   brew tap facebook/fb
-   brew install idb-companion
-   pip install fb-idb
-
-   # For image comparison features (optional)
-   npm install -g opencv4nodejs
-   ```
-
-5. **Xcode Setup**
-   ```bash
-   # Ensure Xcode command line tools point to Xcode.app
-   sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-   
-   # Verify Xcode path
-   xcode-select -p  # Should show: /Applications/Xcode.app/Contents/Developer
-   
-   # Accept Xcode license
-   sudo xcodebuild -license accept
-   
-   # Verify iOS simulator
-   xcrun simctl list devices
-   ```
-
-## 📱 Setting Up Test Applications
-
-1. **iOS Test App Setup**
-   ```bash
-   # Create apps directory
-   mkdir -p apps/ios
-   cd apps/ios
-
-   # Clone and build iOS test app
-   git clone https://github.com/appium/ios-test-app.git
-   cd ios-test-app
-   npm install
-   npm run build
-
-   # The .app file will be in the build folder
-   # Update configs/ios.yaml with the correct path
-   ```
-
-2. **Android Test App Setup**
-   ```bash
-   # Create apps directory
-   mkdir -p apps/android
-   cd apps/android
-
-   # Download Android API Demos app
-   curl -L https://github.com/appium/android-apidemos/raw/master/ApiDemos-debug.apk -o TestApp.apk
-
-   # Update configs/android.yaml with the correct path
+   brew install node  # or use your preferred Node.js installation method
    ```
 
 ## 🚀 Project Setup
@@ -153,233 +65,111 @@
    ```bash
    git clone https://github.com/shane-reaume/robotframework-appium.git
    cd robotframework-appium
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
    ```
 
-2. **Configure Environment**
+2. **Install Dependencies**
    ```bash
-   cp .env.template .env
-   # Edit .env with your device configurations
+   # Install Appium and drivers
+   npm run setup
+   npm run setup-drivers
+
+   # Install Python dependencies
+   npm run postsetup
    ```
 
-3. **Create Virtual Devices**
-
-   For iOS:
-   - Open Xcode
-   - Go to Window → Devices and Simulators
-   - Click '+' to add new simulator
-   - Select iPhone 15 Pro with iOS 17.2
-
-   For Android:
+3. **Create Android Virtual Device**
    - Open Android Studio
    - Go to Tools → Device Manager
    - Click '+ Create Device'
    - Select Pixel 7 → Next
-   - Select API 34 → Next
-   - Name it 'Pixel_7_API_34' → Finish
+   - Select API 35 → Next
+   - Name it 'Pixel_7_API_35' → Finish
 
-4. **Start Appium Server**
+4. **Verify Setup**
    ```bash
-   # Start in a new terminal
-   appium
+   # Check iOS setup
+   npm run doctor-ios
+
+   # Check Android setup
+   npm run doctor-android
    ```
 
-5. **Run Tests**
+## 🧪 Running Tests
+
+1. **Start Required Services**
+
+   For iOS Testing:
    ```bash
-   # Start iOS Simulator
-   open -a Simulator
+   # Terminal 1: Start Appium server
+   npm run start-appium
 
-   # Method 1: Using YAML config (not recommended)
-   # Note: YAML config method can be unreliable due to path resolution issues
-   # and environment variable expansion limitations
-   robot -A configs/ios.yaml tests/ios/test_app.robot
+   # Terminal 2: Start iOS Simulator
+   npm run start-ios-sim
 
-   # Method 2: Using direct variable assignment (recommended)
-   # This method is more reliable as it uses absolute paths and explicit variables
-   robot --variable APPIUM_HOST:localhost \
-        --variable APPIUM_PORT:4723 \
-        --variable PLATFORM_NAME:iOS \
-        --variable PLATFORM_VERSION:17.2 \
-        --variable DEVICE_NAME:"iPhone 15 Pro" \
-        --variable AUTOMATION_NAME:XCUITest \
-        --variable APP:${PWD}/apps/ios/ios-test-app/build/Release-iphonesimulator/TestApp-iphonesimulator.app \
-        --variable TIMEOUT:30 \
-        --variable RETRY_COUNT:2 \
-        --outputdir results \
-        tests/ios/test_app.robot
-
-   # Start Android Emulator and run tests
-   # Replace 'Pixel_7_API_35' with your AVD name
-   $ANDROID_HOME/emulator/emulator -avd Pixel_7_API_35 -gpu host
-
-   # Method 1: Using YAML config (not recommended)
-   robot -A configs/android.yaml tests/android/test_app.robot
-
-   # Method 2: Using direct variable assignment (recommended)
-   robot --variable APPIUM_HOST:localhost \
-        --variable APPIUM_PORT:4723 \
-        --variable PLATFORM_NAME:Android \
-        --variable PLATFORM_VERSION:15.0 \
-        --variable DEVICE_NAME:Pixel_7_API_35 \
-        --variable AUTOMATION_NAME:UiAutomator2 \
-        --variable APP:${PWD}/apps/android/TestApp.apk \
-        --variable APP_PACKAGE:io.appium.android.apis \
-        --variable APP_ACTIVITY:io.appium.android.apis.ApiDemos \
-        --variable TIMEOUT:60 \
-        --variable RETRY_COUNT:2 \
-        --variable UIAUTOMATOR2_SERVER_LAUNCH_TIMEOUT:60000 \
-        --outputdir results \
-        tests/android/test_app.robot
+   # Terminal 3: Run iOS tests
+   npm run test-ios
    ```
 
-## 📊 Test Capabilities
-
-- 📱 App Installation
-- 🔍 Element Location
-- 👆 Touch Actions
-- ⌨️ Text Input
-- 🔄 App State Management
-- 📸 Screenshot Capture
-
-## 📝 Test Results
-
-Results are generated in HTML format:
-- `log.html` - Detailed test logs
-- `report.html` - Test execution summary
-- `output.xml` - Machine-readable results
-
-## 🔒 Troubleshooting
-
-1. **Appium Doctor Issues**
-   - If you see Carthage missing: `brew install carthage`
-   - If Xcode path is incorrect: `sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer`
-   - For opencv4nodejs (optional): `npm install -g opencv4nodejs`
-   - For simulator location setting: `npm install -g set-simulator-location`
-   
-2. **iOS Build Issues**
+   For Android Testing:
    ```bash
-   # Reset iOS simulator
-   xcrun simctl erase all
-   
-   # Verify iOS deployment tools
-   ios-deploy --version
-   idb list targets
+   # Terminal 1: Start Appium server
+   npm run start-appium
+
+   # Terminal 2: Start Android Emulator
+   npm run start-android-emu
+
+   # Terminal 3: Run Android tests
+   npm run test-android
    ```
 
-3. **Android Test Issues**
-   ```bash
-   # If tests fail with UiAutomator2 server launch timeout
-   # Increase the timeout value in the command:
-   --variable UIAUTOMATOR2_SERVER_LAUNCH_TIMEOUT:60000
+2. **View Test Results**
+   - Test results are generated in the `results` directory:
+     - `log.html`: Detailed test logs
+     - `report.html`: Test execution summary
+     - `output.xml`: Machine-readable results
 
-   # If emulator is slow, use GPU acceleration
-   $ANDROID_HOME/emulator/emulator -avd Pixel_7_API_35 -gpu host
+## 🔍 Troubleshooting
 
-   # Verify Android device connection
-   adb devices
-   ```
-
-4. **Appium Server Issues**
-   - Verify server is running: `curl http://localhost:4723/wd/hub/status`
-   - Check appium-doctor results: `appium-doctor --ios` or `appium-doctor --android`
-   - If port 4723 is already in use:
-     ```bash
-     # Find and kill the process using port 4723
-     lsof -i :4723
-     kill -9 <PID>
-     
-     # Or start Appium on a different port
-     appium -p 4724
-     ```
-   - To see detailed logs, start Appium with:
-     ```bash
-     appium --log appium.log
-     ```
-
-5. **iOS Simulator Issues**
-   - Reset simulator: Simulator → Device → Erase All Content and Settings
-   - Verify Xcode command line tools: `xcode-select -p`
-   - If Xcode path is incorrect after update:
+1. **iOS Issues**
+   - If Xcode path is incorrect:
      ```bash
      sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
      sudo xcodebuild -license accept
      ```
-   - Install XCUITest driver for Appium:
+   - If simulator doesn't start:
      ```bash
-     appium driver install xcuitest
+     xcrun simctl erase all  # Reset all simulators
      ```
 
-6. **Android Emulator Issues**
-   ```bash
-   # Verify Java installation
-   java -version  # Should show Java version
-   echo $JAVA_HOME  # Should show Java home path
-   
-   # If Java is not found, reinstall:
-   brew install --cask zulu
-   source ~/.zshrc
+2. **Android Issues**
+   - If emulator is slow:
+     ```bash
+     # GPU acceleration is already enabled in our scripts
+     # Make sure virtualization is enabled in your BIOS
+     ```
+   - If ADB doesn't find device:
+     ```bash
+     adb kill-server
+     adb start-server
+     ```
 
-   # Verify Android SDK tools (from Android Studio SDK location)
-   ls $ANDROID_HOME/cmdline-tools/latest/bin  # Should show sdkmanager, avdmanager, etc.
-   $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list
-   
-   # Check Android tools installation
-   adb devices  # Should list available devices
-   emulator -list-avds  # Should list available emulators
-   
-   # Update Android SDK tools
-   $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --update
-   
-   # Install specific Android platform
-   $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34"
-   
-   # Check bundletool installation
-   bundletool version
+3. **Appium Issues**
+   - If port 4723 is in use:
+     ```bash
+     lsof -i :4723  # Find the process
+     kill -9 <PID>  # Kill it
+     ```
+   - If drivers aren't found:
+     ```bash
+     npm run setup-drivers  # Reinstall drivers
+     ```
 
-   # If emulator is slow or crashes
-   $ANDROID_HOME/emulator/emulator -avd Pixel_7_API_35 -gpu host
+## 🧹 Cleanup
 
-   # Verify emulator is properly set up
-   adb devices
-   ```
-
-   Common fixes:
-   - If Java not found: `brew install --cask zulu`
-   - If JAVA_HOME is not set: `echo 'export JAVA_HOME=$(/usr/libexec/java_home)' >> ~/.zshrc`
-   - If Android SDK location is wrong: Check it in Android Studio → Settings → Languages & Frameworks → Android SDK
-   - If sdkmanager not found: Make sure you've installed "Android SDK Command-line Tools (latest)" in Android Studio
-   - If ADB not found: `brew install android-platform-tools`
-   - If emulator is slow: Enable hardware acceleration in Android Studio AVD Manager
-
-7. **Environment Variable Issues**
-   ```bash
-   # Add these to your shell's rc file (~/.zshrc or ~/.bash_profile)
-   export JAVA_HOME=$(/usr/libexec/java_home)
-   export ANDROID_HOME=$HOME/Library/Android/sdk
-   export PATH=$PATH:$ANDROID_HOME/emulator
-   export PATH=$PATH:$ANDROID_HOME/tools
-   export PATH=$PATH:$ANDROID_HOME/tools/bin
-   export PATH=$PATH:$ANDROID_HOME/platform-tools
-   
-   # After adding variables, always remember to
-   source ~/.zshrc  # or source ~/.bash_profile
-   ```
-
-## 🔒 Security Notes
-
-- Never commit `.env` files or any credentials
-- Use environment variables for sensitive data
-- Keep test app credentials secure
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+To remove generated files and virtual environments:
+```bash
+npm run clean
+```
 
 ## 📄 License
 

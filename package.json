@@ -1,0 +1,23 @@
+{
+  "name": "robotframework-appium",
+  "version": "1.0.0",
+  "description": "Mobile testing with Robot Framework and Appium",
+  "scripts": {
+    "setup": "npm install -g appium@2.14.0 @appium/doctor",
+    "setup-drivers": "appium driver install xcuitest && appium driver install uiautomator2",
+    "postsetup": "python -m venv venv && . venv/bin/activate && pip install -r requirements.txt",
+    "start-appium": "appium --log appium.log",
+    "start-ios-sim": "xcrun simctl boot 'iPhone 16 Pro' || true && open -a Simulator",
+    "start-android-emu": "$ANDROID_HOME/emulator/emulator -avd Pixel_7_API_35 -gpu host",
+    "test-ios": "source venv/bin/activate && robot --variable APPIUM_HOST:localhost --variable APPIUM_PORT:4723 --variable PLATFORM_NAME:iOS --variable PLATFORM_VERSION:18.2 --variable DEVICE_NAME:'iPhone 16 Pro' --variable AUTOMATION_NAME:XCUITest --variable APP:${PWD}/apps/ios/ios-test-app/build/Release-iphonesimulator/TestApp-iphonesimulator.app --variable TIMEOUT:30 --variable RETRY_COUNT:2 --outputdir results tests/ios/test_app.robot",
+    "test-android": "source venv/bin/activate && robot --variable APPIUM_HOST:localhost --variable APPIUM_PORT:4723 --variable PLATFORM_NAME:Android --variable PLATFORM_VERSION:15.0 --variable DEVICE_NAME:Pixel_7_API_35 --variable AUTOMATION_NAME:UiAutomator2 --variable APP:${PWD}/apps/android/TestApp.apk --variable APP_PACKAGE:io.appium.android.apis --variable APP_ACTIVITY:io.appium.android.apis.ApiDemos --variable TIMEOUT:60 --variable RETRY_COUNT:2 --variable UIAUTOMATOR2_SERVER_LAUNCH_TIMEOUT:60000 --outputdir results tests/android/test_app.robot",
+    "doctor-ios": "appium-doctor --ios",
+    "doctor-android": "appium-doctor --android",
+    "clean": "rm -rf results/ *.log venv/ && find . -type d -name '__pycache__' -exec rm -r {} + || true"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+} 
